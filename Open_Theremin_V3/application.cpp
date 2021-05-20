@@ -333,7 +333,7 @@ static long pitchfn0 = 0;
 static long pitchfn1 = 0;
 static long pitchfn = 0;
 
-  Serial.begin(115200);
+  Serial.begin(Application::BAUD);
   Serial.println("\nPITCH CALIBRATION\n");
 
   HW_LED1_OFF;
@@ -420,7 +420,7 @@ static long volumefn0 = 0;
 static long volumefn1 = 0;
 static long volumefn = 0;
 
-    Serial.begin(115200);
+    Serial.begin(Application::BAUD);
     Serial.println("\nVOLUME CALIBRATION");
     
   InitialiseVolumeMeasurement();
