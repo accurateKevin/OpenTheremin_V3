@@ -32,6 +32,7 @@ Application::Application()
 void Application::setup() {
 #if SERIAL_ENABLED
   Serial.begin(Application::BAUD);
+  Serial.print("\nSerial enabled\n");
 #endif
 
   HW_LED1_ON;HW_LED2_OFF;
@@ -241,13 +242,15 @@ void Application::loop() {
   OCR0A = pitch & 0xff;
 #endif
 
-#if SERIAL_ENABLED
+
   if (timerExpired(TICKS_100_MILLIS)) {
     resetTimer();
-    Serial.write(pitch & 0xff);              // Send char on serial (if used)
-    Serial.write((pitch >> 8) & 0xff);
+    #if SERIAL_ENABLED
+      Serial.write(pitch & 0xff);              // Send char on serial (if used)
+      Serial.write((pitch >> 8) & 0xff);
+    #endif
   }
-#endif
+
 
   if (pitchValueAvailable) {                        // If capture event
 
@@ -333,19 +336,26 @@ static long pitchfn0 = 0;
 static long pitchfn1 = 0;
 static long pitchfn = 0;
 
-  Serial.begin(Application::BAUD);
+#if SERIAL_ENABLED
   Serial.println("\nPITCH CALIBRATION\n");
+#endif
+#if SERIAL_ENABLED
+  Serial.begin(Application::BAUD);
+  Serial.print("\nSerial enabled 2\n");
+#endif
 
   HW_LED1_OFF;
   HW_LED2_ON;
-  
+
   InitialisePitchMeasurement();
   interrupts();
   SPImcpDACinit();
 
-  qMeasurement = GetQMeasurement();  // Measure Arudino clock frequency 
-  Serial.print("Arudino Freq: ");
+  qMeasurement = GetQMeasurement();  // Measure Arudino clock frequency
+#if SERIAL_ENABLED
+  Serial.print("\nArudino Freq: \n");
   Serial.println(qMeasurement);
+#endif
 
 q0 = (16000000/qMeasurement*500000);  //Calculated set frequency based on Arudino clock frequency
 
@@ -354,8 +364,10 @@ pitchXn1 = 4095;
 
 pitchfn = q0-PitchFreqOffset;        // Add offset calue to set frequency
 
+#if SERIAL_ENABLED
 Serial.print("\nPitch Set Frequency: ");
 Serial.println(pitchfn);
+#endif
 
 
 SPImcpDAC2Bsend(1600);
@@ -368,12 +380,14 @@ SPImcpDAC2Asend(pitchXn1);
 delay(100);
 pitchfn1 = GetPitchMeasurement();
 
+#if SERIAL_ENABLED
 Serial.print ("Frequency tuning range: ");
 Serial.print(pitchfn0);
 Serial.print(" to ");
 Serial.println(pitchfn1);
-  
- 
+#endif
+
+
 while(abs(pitchfn0-pitchfn1)>CalibrationTolerance){      // max allowed pitch frequency offset
 
 SPImcpDAC2Asend(pitchXn0);
@@ -386,6 +400,7 @@ pitchfn1 = GetPitchMeasurement()-pitchfn;
 
 pitchXn2=pitchXn1-((pitchXn1-pitchXn0)*pitchfn1)/(pitchfn1-pitchfn0); // new DAC value
 
+#if SERIAL_ENABLED
 Serial.print("\nDAC value L: ");
 Serial.print(pitchXn0);
 Serial.print(" Freq L: ");
@@ -394,6 +409,7 @@ Serial.print("DAC value H: ");
 Serial.print(pitchXn1);
 Serial.print(" Freq H: ");
 Serial.println(pitchfn1);
+#endif
 
 
 pitchXn0 = pitchXn1;
@@ -420,9 +436,10 @@ static long volumefn0 = 0;
 static long volumefn1 = 0;
 static long volumefn = 0;
 
-    Serial.begin(Application::BAUD);
+#if SERIAL_ENABLED
     Serial.println("\nVOLUME CALIBRATION");
-    
+#endif
+
   InitialiseVolumeMeasurement();
   interrupts();
   SPImcpDACinit();
@@ -434,8 +451,10 @@ volumeXn1 = 4095;
 q0 = (16000000/qMeasurement*460765);
 volumefn = q0-VolumeFreqOffset;
 
+#if SERIAL_ENABLED
 Serial.print("\nVolume Set Frequency: ");
 Serial.println(volumefn);
+#endif
 
 
 SPImcpDAC2Bsend(volumeXn0);
@@ -448,11 +467,12 @@ SPImcpDAC2Bsend(volumeXn1);
 delay_NOP(44316);//44316=100ms
 volumefn1 = GetVolumeMeasurement();
 
-
+#if SERIAL_ENABLED
 Serial.print ("Frequency tuning range: ");
 Serial.print(volumefn0);
 Serial.print(" to ");
 Serial.println(volumefn1);
+#endif
 
 
 while(abs(volumefn0-volumefn1)>CalibrationTolerance){
@@ -467,6 +487,7 @@ volumefn1 = GetVolumeMeasurement()-volumefn;
 
 volumeXn2=volumeXn1-((volumeXn1-volumeXn0)*volumefn1)/(volumefn1-volumefn0); // calculate new DAC value
 
+#if SERIAL_ENABLED
 Serial.print("\nDAC value L: ");
 Serial.print(volumeXn0);
 Serial.print(" Freq L: ");
@@ -475,6 +496,7 @@ Serial.print("DAC value H: ");
 Serial.print(volumeXn1);
 Serial.print(" Freq H: ");
 Serial.println(volumefn1);
+#endif
 
 
 volumeXn0 = volumeXn1;
@@ -488,7 +510,9 @@ EEPROM.put(2,volumeXn0);
   HW_LED2_OFF;
   HW_LED1_ON;
 
+#if SERIAL_ENABLED
   Serial.println("\nCALIBRATION COMPLETED\n");
+#endif
 }
 
 void Application::hzToAddVal(float hz) {
