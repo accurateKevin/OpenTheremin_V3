@@ -287,11 +287,11 @@ void Application::loop() {
 
     // Limit and set volume value
     vol_v = min(vol_v, 4095);
-    //    vol_v = vol_v - (1 + MAX_VOLUME - (volumePotValue << 2));
+    vol_v = vol_v - (1 + MAX_VOLUME - (volumePotValue << 2));
     vol_v = vol_v ;
     vol_v = max(vol_v, 0);
     tmpVolume = vol_v >> 4;
-	
+
 	// Give vScaledVolume a pseudo-exponential characteristic:
 	vScaledVolume = tmpVolume * (tmpVolume + 2);
 
