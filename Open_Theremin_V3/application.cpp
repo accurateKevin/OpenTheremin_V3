@@ -8,6 +8,8 @@
 #include "timer.h"
 #include "EEPROM.h"
 
+#include "autotune.h"
+
 const AppMode AppModeValues[] = {MUTE,NORMAL};
 const int16_t CalibrationTolerance = 15;
 const int16_t PitchFreqOffset = 700;
@@ -32,7 +34,7 @@ Application::Application()
 void Application::setup() {
 #if SERIAL_ENABLED
   Serial.begin(Application::BAUD);
-  Serial.print("\nSerial enabled\n");
+  Serial.print("\n\nSerial enabled\n");
 #endif
 
   HW_LED1_ON;HW_LED2_OFF;
@@ -51,15 +53,19 @@ EEPROM.get(2,volumeDAC);
 SPImcpDAC2Asend(pitchDAC);
 SPImcpDAC2Bsend(volumeDAC);
 
-  
+
 initialiseTimer();
 initialiseInterrupts();
 
 
   EEPROM.get(4,pitchCalibrationBase);
   EEPROM.get(8,volCalibrationBase);
- 
 
+int edge_result = set_tone_edges();
+#if SERIAL_ENABLED
+  Serial.print("\nResult from set tone edges: ");
+  Serial.print(edge_result);
+#endif
 
 }
 
@@ -158,7 +164,7 @@ AppMode Application::nextMode() {
 }
 
 void Application::loop() {
-  int32_t pitch_v = 0, pitch_l = 0;            // Last value of pitch  (for filtering)
+  int32_t pitch_tuned = 0, pitch_v = 0, pitch_l = 0;            // Last value of pitch  (for filtering)
   int32_t vol_v = 0,   vol_l = 0;              // Last value of volume (for filtering)
 
   uint16_t volumePotValue = 0;
