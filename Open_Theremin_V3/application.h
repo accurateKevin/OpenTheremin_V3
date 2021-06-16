@@ -31,21 +31,21 @@ class Application {
     static const int16_t REGISTER_SELECT_POT = 3;
 
 
-    
-#if SERIAL_ENABLED    
-    static const int BAUD = 115200;
+
+#if SERIAL_ENABLED
+    static const long BAUD = 38400;
 #endif
 
     AppState _state;
     AppMode  _mode;
-        
+
     void calibrate();
     void calibrate_pitch();
     void calibrate_volume();
 
 
     AppMode nextMode();
-    
+
     void initialiseTimer();
     void initialiseInterrupts();
     void InitialisePitchMeasurement();

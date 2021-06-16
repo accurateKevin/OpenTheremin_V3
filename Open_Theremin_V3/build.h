@@ -5,10 +5,13 @@
 
 
 // Set to build with serial support
-#define SERIAL_ENABLED 0
+#define SERIAL_ENABLED 1
 
 // Set to build with control voltage output (experimental)
 #define CV_ENABLED 0
+
+//Set to build in debug mode
+#define DEBUG 1
 
 
 #endif // _BUILD_H
